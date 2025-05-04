@@ -1,0 +1,25 @@
+{
+    
+    "version": "1.0",
+    "description": "Calculadora de Viagens para calcular o custo total de uma viagem com base na distância, consumo do veículo e preço do combustível.",
+    "author": "Jardel Ferreira de Sousa",
+    "license": "MIT" ,
+    "name": "Calculadora de Viagens",
+    "short_name": "Viagens",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#00796b",
+    "icons": [
+      {
+        "src": "icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
