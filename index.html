@@ -1305,6 +1305,21 @@
         .then(reg => console.log('Service Worker registrado!', reg))
         .catch(err => console.error('Erro ao registrar o SW', err));
     }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          console.log("Localização atual:", lat, lng);
+        },
+        (error) => {
+          console.error("Erro ao obter localização:", error.message);
+        }
+      );
+    } else {
+      alert("Geolocalização não é suportada neste navegador.");
+    }
+      
   </script>
 </body>
 </html>
