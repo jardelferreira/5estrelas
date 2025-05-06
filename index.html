@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,7 +21,7 @@
       border-radius: 12px;
       max-width: 500px;
       margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
     h1 {
@@ -28,7 +29,9 @@
       color: #00796b;
     }
 
-    select, textarea, input[type="number"] {
+    select,
+    textarea,
+    input[type="number"] {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
@@ -76,6 +79,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>Calculadora de Viagens</h1>
@@ -94,15 +98,17 @@
       <label><input type="checkbox" id="noturno" onchange="calcularValor()"> Viagem entre 23h e 05h</label>
       <label><input type="checkbox" id="compras" onchange="calcularValor()"> Saída de mercado com compras</label>
       <label><input type="checkbox" id="seisLugares" onchange="calcularValor()"> Carro de 6 lugares</label>
-      <label><input type="checkbox" id="pedagio" onchange="calcularValor()"> Pedágio ? digite o valor abaixo:  
-      <input onkeyup="calcularValor()" id="pedagioValor" placeholder="Ex: 11.50" step="0.1" type="number"></label>
+      <label><input type="checkbox" id="pedagio" onchange="calcularValor()"> Pedágio ? digite o valor abaixo:
+        <input onkeyup="calcularValor()" id="pedagioValor" placeholder="Ex: 11.50" step="0.1" type="number"></label>
     </div>
 
     <label for="observacao">Observações:</label>
-    <textarea id="observacao" rows="3" oninput="calcularValor()" placeholder="Digite observações adicionais..."></textarea>
+    <textarea id="observacao" rows="3" oninput="calcularValor()"
+      placeholder="Digite observações adicionais..."></textarea>
 
     <div class="result" id="valor"></div>
 
+    <div id="geolocation">Localização Atual</div>
     <button onclick="compartilharWhatsApp()">Compartilhar no WhatsApp</button>
   </div>
 
@@ -1285,12 +1291,12 @@
       const valor = valorDiv.textContent;
 
       if (!origem || !destino || !valor) return alert('Preencha os campos corretamente.');
-      
+
       mensagem = `🚕 *Viagem calculada*\n\n🛫 Origem: ${origem}\n🎯 Destino: ${destino}`;
-      pedagio ? mensagem += `\n💰 Pedágios: ${new Intl.NumberFormat('pt-BR',{
+      pedagio ? mensagem += `\n💰 Pedágios: ${new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL'
-      }).format(pedagioValor)}`: null;
+      }).format(pedagioValor)}` : null;
       mensagem += `\n💵 *${valor}*`;
       obs ? mensagem += `\n📝 Observação: ${obs}` : null;
       const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
@@ -1311,6 +1317,7 @@
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
           console.log("Localização atual:", lat, lng);
+          getAddressFromCoords(lat, lng);
         },
         (error) => {
           console.error("Erro ao obter localização:", error.message);
@@ -1319,7 +1326,328 @@
     } else {
       alert("Geolocalização não é suportada neste navegador.");
     }
-      
+
+    function getAddressFromCoords(lat, lon) {
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=AIzaSyAqdoXdjUq5txykTMQsfwnkO1aTbx4kf-g`)
+        .then(response => response.json())
+        .then(data => {
+          const address = data.display_name;
+          console.log(data);
+          const address_content = findNearestAddress(data);
+          document.getElementById("geolocation").textContent = address_content.formatted_address;
+        })
+        .catch(error => {
+          console.error("Erro ao buscar endereço:", error);
+        });
+    }
+
   </script>
+  <script>
+    /**
+ * Encontra o endereço mais próximo da coordenada de referência (primeiro resultado)
+ * usando a fórmula de Haversine para calcular distâncias entre coordenadas geográficas
+ * @param {Object} mapsData - Dados da resposta da API do Google Maps
+ * @returns {Object} - O resultado (endereço) mais próximo da coordenada de referência
+ */
+function findNearestAddress(mapsData) {
+  // Verificação de dados de entrada
+  if (!mapsData || !mapsData.results || mapsData.results.length === 0) {
+    return { error: "Dados inválidos ou vazios" };
+  }
+
+  // Obtém a coordenada de referência do primeiro resultado
+  const referenceCoord = mapsData.results[0].geometry.location;
+  
+  // Cria um array para armazenar os resultados com suas distâncias calculadas
+  const resultsWithDistance = mapsData.results.map(result => {
+    // Verifica se o resultado possui coordenadas válidas
+    if (!result.geometry || !result.geometry.location) {
+      return { result, distance: Number.MAX_VALUE };
+    }
+    
+    // Calcula a distância entre a coordenada de referência e a coordenada do resultado atual
+    const distance = calculateHaversineDistance(
+      referenceCoord.lat, 
+      referenceCoord.lng,
+      result.geometry.location.lat, 
+      result.geometry.location.lng
+    );
+    
+    return { result, distance };
+  });
+  
+  // Ordena os resultados por distância (do mais próximo ao mais distante)
+  resultsWithDistance.sort((a, b) => a.distance - b.distance);
+  
+  // O primeiro resultado após a ordenação será o mais próximo (ignorando o próprio referencial)
+  // Começamos do índice 1 para pular o próprio ponto de referência
+  const nearest = resultsWithDistance.length > 1 ? resultsWithDistance[1] : resultsWithDistance[0];
+  
+  // Exibe informações sobre o endereço mais próximo
+  console.log("Coordenada de referência:", referenceCoord);
+  console.log("Endereço mais próximo:", nearest.result.formatted_address);
+  console.log("Distância calculada:", nearest.distance.toFixed(2), "metros");
+  
+  return nearest.result;
+}
+
+/**
+ * Calcula a distância entre dois pontos de coordenadas usando a fórmula de Haversine
+ * @param {number} lat1 - Latitude do primeiro ponto
+ * @param {number} lon1 - Longitude do primeiro ponto
+ * @param {number} lat2 - Latitude do segundo ponto
+ * @param {number} lon2 - Longitude do segundo ponto
+ * @returns {number} - Distância em metros
+ */
+function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+  // Raio da Terra em metros
+  const R = 6371000;
+  
+  // Converte graus para radianos
+  const φ1 = lat1 * Math.PI / 180;
+  const φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lon2 - lon1) * Math.PI / 180;
+  
+  // Fórmula de Haversine
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  
+  // Distância em metros
+  return R * c;
+}
+
+/* Exemplo de uso:
+// Considere que 'mapsData' é o objeto JSON recebido da API do Google Maps
+
+// Teste com os dados da API (removidos caracteres de escape)
+const mapsData = {
+  "plus_code": {
+    "compound_code": "MWWJ+JMM Cabo de Santo Agostinho, PE, Brasil",
+    "global_code": "6936MWWJ+JMM"
+  },
+  "results": [
+    {
+      "address_components": [
+        {
+          "long_name": "MWWJ+JM",
+          "short_name": "MWWJ+JM",
+          "types": ["plus_code"]
+        },
+        {
+          "long_name": "Cabo de Santo Agostinho",
+          "short_name": "Cabo de Santo Agostinho",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "Pernambuco",
+          "short_name": "PE",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": ["country", "political"]
+        }
+      ],
+      "formatted_address": "MWWJ+JM Cabo de Santo Agostinho, PE, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -8.303374999999999,
+            "lng": -35.06825
+          },
+          "southwest": {
+            "lat": -8.3035,
+            "lng": -35.068375
+          }
+        },
+        "location": {
+          "lat": -8.3034112,
+          "lng": -35.0683136
+        },
+        "location_type": "GEOMETRIC_CENTER",
+        "viewport": {
+          "northeast": {
+            "lat": -8.302088519708498,
+            "lng": -35.0669635197085
+          },
+          "southwest": {
+            "lat": -8.304786480291503,
+            "lng": -35.0696614802915
+          }
+        }
+      },
+      "place_id": "GhIJ8Hp6tlibIMARnu8CgL6IQcA",
+      "plus_code": {
+        "compound_code": "MWWJ+JM Cabo de Santo Agostinho, PE, Brasil",
+        "global_code": "6936MWWJ+JM"
+      },
+      "types": ["plus_code"]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "16",
+          "short_name": "16",
+          "types": ["street_number"]
+        },
+        {
+          "long_name": "BR-101",
+          "short_name": "BR-101",
+          "types": ["route"]
+        },
+        {
+          "long_name": "Vila Teatrologo Barreto Junior",
+          "short_name": "Vila Teatrologo Barreto Junior",
+          "types": ["political", "sublocality", "sublocality_level_1"]
+        },
+        {
+          "long_name": "Cabo de Santo Agostinho",
+          "short_name": "Cabo de Santo Agostinho",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "Pernambuco",
+          "short_name": "PE",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": ["country", "political"]
+        },
+        {
+          "long_name": "54590-000",
+          "short_name": "54590-000",
+          "types": ["postal_code"]
+        }
+      ],
+      "formatted_address": "BR-101, 16 - Vila Teatrologo Barreto Junior, Cabo de Santo Agostinho - PE, 54590-000, Brasil",
+      "geometry": {
+        "location": {
+          "lat": -8.302287,
+          "lng": -35.069497
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": -8.300938019708497,
+            "lng": -35.0681480197085
+          },
+          "southwest": {
+            "lat": -8.303635980291501,
+            "lng": -35.07084598029149
+          }
+        }
+      },
+      "navigation_points": [
+        {
+          "location": {
+            "latitude": -8.3022305,
+            "longitude": -35.069588
+          }
+        }
+      ],
+      "place_id": "ChIJkQsxhETwqgcRyg3LMtFWstA",
+      "plus_code": {
+        "compound_code": "MWXJ+36 Vila Teatrologo Barreto Junior, Cabo de Santo Agostinho - PE, Brasil",
+        "global_code": "6936MWXJ+36"
+      },
+      "types": ["street_address"]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "4",
+          "short_name": "4",
+          "types": ["street_number"]
+        },
+        {
+          "long_name": "BR-101",
+          "short_name": "BR-101",
+          "types": ["route"]
+        },
+        {
+          "long_name": "Pirapama",
+          "short_name": "Pirapama",
+          "types": ["political", "sublocality", "sublocality_level_1"]
+        },
+        {
+          "long_name": "Cabo de Santo Agostinho",
+          "short_name": "Cabo de Santo Agostinho",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "Pernambuco",
+          "short_name": "PE",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "Brasil",
+          "short_name": "BR",
+          "types": ["country", "political"]
+        },
+        {
+          "long_name": "54590-000",
+          "short_name": "54590-000",
+          "types": ["postal_code"]
+        }
+      ],
+      "formatted_address": "BR-101, 4 - Pirapama, Cabo de Santo Agostinho - PE, 54590-000, Brasil",
+      "geometry": {
+        "bounds": {
+          "northeast": {
+            "lat": -8.3014189,
+            "lng": -35.0697753
+          },
+          "southwest": {
+            "lat": -8.3017527,
+            "lng": -35.0700023
+          }
+        },
+        "location": {
+          "lat": -8.3015854,
+          "lng": -35.0698928
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": -8.300236819708497,
+            "lng": -35.0685398197085
+          },
+          "southwest": {
+            "lat": -8.302934780291501,
+            "lng": -35.0712377802915
+          }
+        }
+      },
+      "navigation_points": [
+        {
+          "location": {
+            "latitude": -8.3017435,
+            "longitude": -35.0696269
+          }
+        }
+      ],
+      "place_id": "ChIJ5aJoY0PwqgcRB5H7tsKTp2c",
+      "types": ["premise", "street_address"]
+    },
+    // Outros resultados omitidos para brevidade
+  ],
+  "status": "OK"
+};
+
+// Encontra o endereço mais próximo
+const nearestAddress = findNearestAddress(mapsData);
+
+// Exibe o resultado
+console.log("Endereço mais próximo encontrado:");
+console.log(JSON.stringify(nearestAddress, null, 2));
+*/ 
+</script>
 </body>
+
 </html>
