@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Reorganizar e Ordenar JSON de Viagens</title>
+</head>
+<body>
+  <h2>Reorganizar JSON (Com Caminhos de Volta + Ordenação)</h2>
+  <input type="file" id="jsonInput" accept=".json">
+  <button onclick="exportarNovoJSON()">Exportar Novo JSON</button>
+
+  <script>
+    let novoJSON = null;
+
+    document.getElementById('jsonInput').addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const conteudo = e.target.result;
+        let original = JSON.parse(conteudo);
+        let reorganizado = {};
+
+        for (let origem in original.origens) {
+          const origemUP = origem.toUpperCase();
+          if (!reorganizado[origemUP]) {
+            reorganizado[origemUP] = {};
+          }
+
+          const destinos = original.origens[origem].destinos;
+
+          for (let destino in destinos) {
+            const destinoUP = destino.toUpperCase();
+            const valor = destinos[destino];
+
+            if (!reorganizado[origemUP]) {
+              reorganizado[origemUP] = {};
+            }
+            reorganizado[origemUP][destinoUP] = valor;
+
+            // Inverter (rota de volta)
+            if (!reorganizado[destinoUP]) {
+              reorganizado[destinoUP] = {};
+            }
+            reorganizado[destinoUP][origemUP] = valor;
+          }
+        }
+
+        // Ordenar origens e destinos
+        const origensOrdenadas = Object.keys(reorganizado).sort();
+        const jsonOrdenado = { origens: {} };
+
+        for (const origem of origensOrdenadas) {
+          const destinos = reorganizado[origem];
+          const destinosOrdenados = {};
+
+          Object.keys(destinos)
+            .sort()
+            .forEach(destino => {
+              destinosOrdenados[destino] = destinos[destino];
+            });
+
+          jsonOrdenado.origens[origem] = { destinos: destinosOrdenados };
+        }
+
+        novoJSON = jsonOrdenado;
+        console.log("Novo JSON reorganizado e ordenado:", novoJSON);
+        alert("Novo JSON criado com sucesso! Clique em 'Exportar Novo JSON' para baixar.");
+      };
+
+      reader.readAsText(file);
+    });
+
+    function exportarNovoJSON() {
+      if (!novoJSON) {
+        alert("Nenhum JSON processado ainda.");
+        return;
+      }
+
+      const blob = new Blob([JSON.stringify(novoJSON, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'viagens_reorganizado_ordenado.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

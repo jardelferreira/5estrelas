@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Conversor de TXT para JSON</title>
+</head>
+<body>
+  <h2>Converter .txt para JSON com Origens e Destinos</h2>
+  <input type="file" id="fileInput" accept=".txt">
+  <button onclick="baixarJSON()">Exportar JSON</button>
+
+  <script>
+    let dadosFinais = {};
+
+    document.getElementById('fileInput').addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const linhas = e.target.result.split('\n');
+        const dados = {};
+
+        const regex = /^R\$ ?(\d+,\d{2}) - (.+?) X (.+)$/i;
+
+        for (let linha of linhas) {
+          linha = linha.trim();
+          if (!linha) continue;
+
+          const match = linha.match(regex);
+          if (!match) continue;
+
+          const valor = parseFloat(match[1].replace(',', '.'));
+          const origem = match[2].trim().toLowerCase();
+          const destino = match[3].trim();
+
+          if (!dados[origem]) {
+            dados[origem] = { destinos: {} };
+          }
+
+          dados[origem].destinos[destino] = valor;
+        }
+
+        // Ordenar alfabeticamente origens e destinos
+        const origensOrdenadas = {};
+        Object.keys(dados).sort().forEach(origem => {
+          const destinosOrdenados = {};
+          Object.keys(dados[origem].destinos).sort().forEach(destino => {
+            destinosOrdenados[destino] = dados[origem].destinos[destino];
+          });
+          origensOrdenadas[origem] = { destinos: destinosOrdenados };
+        });
+
+        dadosFinais = { origens: origensOrdenadas };
+        console.log("JSON gerado:", dadosFinais);
+        alert('JSON gerado com sucesso! Clique em "Exportar JSON" para baixar.');
+      };
+
+      reader.readAsText(file);
+    });
+
+    function baixarJSON() {
+      if (!dadosFinais.origens) {
+        alert("Nenhum dado carregado.");
+        return;
+      }
+
+      const blob = new Blob([JSON.stringify(dadosFinais, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'viagens.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

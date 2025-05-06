@@ -7,6 +7,9 @@
   <title>Calculadora de Viagens</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#00796b" />
+
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -77,6 +80,80 @@
     button:hover {
       background: #005b4f;
     }
+
+    #geoinfo {
+      background-color: #f0f4f8;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      padding: 12px 16px;
+      max-width: 400px;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      color: #333;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+    }
+
+    #geoinfo strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #1a73e8;
+    }
+
+    #geolocation {
+      display: inline-block;
+      color: #111;
+      font-weight: 500;
+    }
+  </style>
+  <style>
+    /* Estilo para o container do Select2 */
+    .select2-container--custom .select2-selection--single {
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      height: auto;
+      font-size: 16px;
+      color: #333;
+    }
+
+    /* Estilo para o texto selecionado */
+    .select2-container--custom .select2-selection__rendered {
+      color: #333;
+      line-height: 1.5;
+    }
+
+    /* Estilo para o ícone de seta */
+    .select2-container--custom .select2-selection__arrow {
+      height: 100%;
+      right: 10px;
+    }
+
+    /* Estilo para o dropdown */
+    .select2-container--custom .select2-dropdown {
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    /* Estilo para as opções */
+    .select2-container--custom .select2-results__option {
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    /* Estilo para a opção selecionada */
+    .select2-container--custom .select2-results__option--highlighted {
+      background-color: #00796b;
+      color: #ffffff;
+    }
+
+    .select2-results__options {
+      max-height: 50vh;
+      /* 50% da altura da viewport */
+      overflow-y: auto;
+    }
   </style>
 </head>
 
@@ -108,1119 +185,26 @@
 
     <div class="result" id="valor"></div>
 
-    <div id="geolocation">Localização Atual</div>
+    <div id="geoinfo">
+      <strong>📍 Localização Atual:</strong>
+      <span id="geolocation">Buscando localização...</span>
+    </div>
+
     <button onclick="compartilharWhatsApp()">Compartilhar no WhatsApp</button>
   </div>
-
+  <!-- jQuery (obrigatório para Select2) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script>
-    const dados = {
-      "origens": {
-        "ALTO São Francisco": {
-          "destinos": {
-            "Águia American Club": 28,
-            "Algodoais Sentido ipojuca": 25,
-            "Algodoais Sentido praia": 20,
-            "alto cajueiro": 26,
-            "Alto S. Francisco": 10,
-            "Amor e Saúde": 15,
-            "Bar do doido": 65,
-            "Barbalho 1 e 2": 20,
-            "Bela vista": 18,
-            "Burrama": 30,
-            "Calhetas": 55,
-            "Casinhas Etapa 1": 15,
-            "Casinhas Etapa 2": 18,
-            "Centro do Cabo": 15,
-            "Charneca Corgo": 23,
-            "Charneca dificil Acesso": 23,
-            "Charneca Principal Baixo": 20,
-            "Charnequinha alta": 13,
-            "Charnequinha Baixa": 13,
-            "Cida park": 24,
-            "Cohab Antes da Passira": 13,
-            "Cohab Após a Passira": 15,
-            "Comun CONEST": 23,
-            "Comun Destilaria": 18,
-            "Cone antes do Don Helder": 20,
-            "Cruzeiro": 18,
-            "Destilaria": 15,
-            "Don Helder": 23,
-            "Eng. Novo Até a STATUS": 20,
-            "Eng. Novo Até o posto": 20,
-            "Ens. dos corais": 35,
-            "Gaibu": 35,
-            "Garapu após 2° Modelo": 20,
-            "Garapú até 2º Modelo": 18,
-            "Garapu Campo de aranha": 20,
-            "Garapu Flamenguinho": 25,
-            "Garapú Rosário": 20,
-            "Infantil": 15,
-            "Itapuama": 40,
-            "Jaqueira": 45,
-            "L. Garapu 2": 13,
-            "Malaquias Alto": 15,
-            "Malaquias Baixo": 15,
-            "Malaquias R.2;3 e Assembleia": 15,
-            "Massangana": 30,
-            "Mauriti": 13,
-            "Mista": 18,
-            "Muro alto": 75,
-            "Novo horiz. Difícil acesso": 23,
-            "Novo horiz. Principais": 20,
-            "P. de Galinhas": 75,
-            "P. de suape + pedágio Após posto": 35,
-            "P. de Suape + pedágio até o posto SHELL": 30,
-            "P. de suape 2ª + pedágio Portária": 40,
-            "Paiva": 45,
-            "Pirapama": 20,
-            "Pirapama manguerinha": 28,
-            "Pista preta": 25,
-            "Ponte dos Carv.": 28,
-            "Pontezinha": 33,
-            "Praia de Suape": 45,
-            "Recanto do Paraíso": 38,
-            "Rosário": 20,
-            "Rua 52;28 Bairro": 10,
-            "Rua 53 Bairro": 10,
-            "Rua da aurora Bairro": 13,
-            "Rua do Açude": 13,
-            "Rua do bicudo": 13,
-            "Rua do dique": 18,
-            "Santa Rosa Shekiná": 23,
-            "SANTO iNÁCIO": 15,
-            "São Francisco": 10,
-            "Sapucaia": 13,
-            "serraria": 25,
-            "SETOR 4": 40,
-            "Torrinha": 15,
-            "Torrinha Alto": 18,
-            "Vila Claudete": 15,
-            "Vila do SESI": 18,
-            "Vila social": 15,
-            "Xareu": 40
-          }
-        },
-        "Bairro S. Francisco": {
-          "destinos": {
-            "Águia American Club": 25,
-            "Algodoais Sentido ipojuca": 25,
-            "Algodoais Sentido praia": 20,
-            "alto cajueiro": 25,
-            "Alto S. Francisco": 10,
-            "Amor e Saúde": 13,
-            "Bar do doido": 60,
-            "Barbalho 1 e 2": 18,
-            "Bela vista": 15,
-            "Burrama": 28,
-            "Calhetas": 50,
-            "Casinhas Etapa 1": 13,
-            "Casinhas Etapa 2": 15,
-            "Centro do Cabo": 13,
-            "Charneca Corgo": 20,
-            "Charneca dificil Acesso": 20,
-            "Charneca Principal Baixo": 18,
-            "Charnequinha alta": 13,
-            "Charnequinha Baixa": 10,
-            "Cida park": 21,
-            "Cohab Antes da Passira": 10,
-            "Cohab Após a Passira": 13,
-            "Comun CONEST": 20,
-            "Comun Destilaria": 15,
-            "Cone antes do Don Helder": 17,
-            "Cruzeiro": 15,
-            "Destilaria": 13,
-            "Don Helder": 20,
-            "Eng. Novo Até a STATUS": 18,
-            "Eng. Novo Até o posto": 18,
-            "Ens. dos corais": 30,
-            "Gaibu": 30,
-            "Garapu após 2° Modelo": 18,
-            "Garapú até 2º Modelo": 15,
-            "Garapu Campo de aranha": 18,
-            "Garapu Flamenguinho": 23,
-            "Garapú Rosário": 20,
-            "Infantil": 13,
-            "Itapuama": 35,
-            "Jaqueira": 40,
-            "L. Garapu 2": 13,
-            "Malaquias Alto": 13,
-            "Malaquias Baixo": 13,
-            "Malaquias R.2;3 e Assembleia": 13,
-            "Massangana": 30,
-            "Mauriti": 10,
-            "Mista": 15,
-            "Muro alto": 70,
-            "Novo horiz. Difícil acesso": 21,
-            "Novo horiz. Principais": 18,
-            "P. de Galinhas": 70,
-            "P. de suape + pedágio Após posto": 35,
-            "P. de Suape + pedágio até o posto SHELL": 30,
-            "P. de suape 2ª + pedágio Portária": 40,
-            "Paiva": 40,
-            "Pirapama": 18,
-            "Pirapama manguerinha": 25,
-            "Pista preta": 23,
-            "Ponte dos Carv.": 25,
-            "Pontezinha": 30,
-            "Praia de Suape": 40,
-            "Recanto do Paraíso": 35,
-            "Rosário": 17,
-            "Rua 52;28 Bairro": 10,
-            "Rua 53 Bairro": 10,
-            "Rua da aurora Bairro": 10,
-            "Rua do Açude": 13,
-            "Rua do bicudo": 13,
-            "Rua do dique": 15,
-            "Santa Rosa Shekiná": 20,
-            "SANTO iNÁCIO": 13,
-            "São Francisco": 10,
-            "Sapucaia": 13,
-            "serraria": 25,
-            "SETOR 4": 35,
-            "Torrinha": 13,
-            "Torrinha Alto": 15,
-            "Vila Claudete": 13,
-            "Vila do SESI": 15,
-            "Vila social": 13,
-            "Xareu": 35
-          }
-        },
-        "BURRAMA": {
-          "destinos": {
-            "Águia American Club": 40,
-            "Algodoais Sentido ipojuca": 45,
-            "Algodoais Sentido praia": 40,
-            "alto cajueiro": 40,
-            "Alto S. Francisco": 30,
-            "Amor e Saúde": 20,
-            "Bar do doido": 80,
-            "Barbalho 1 e 2  e": 35,
-            "Bela vista": 25,
-            "Burrama": 15,
-            "Calhetas": 70,
-            "Casinhas Etapa 1": 25,
-            "Casinhas Etapa 2": 28,
-            "Centro do Cabo": 20,
-            "Charneca Corgo": 38,
-            "Charneca dificil Acesso": 38,
-            "Charneca Principal Baixo": 35,
-            "Charnequinha alta": 28,
-            "Charnequinha Baixa": 25,
-            "Cida park": 38,
-            "Cohab Antes da Passira": 25,
-            "Cohab Após a Passira": 25,
-            "Comun CONEST": 25,
-            "Comun Destilaria": 23,
-            "Cone antes do Don Helder": 20,
-            "Cruzeiro": 25,
-            "Destilaria": 20,
-            "Don Helder": 22,
-            "Eng. Novo Até a STATUS": 28,
-            "Eng. Novo Até o posto": 28,
-            "Ens. dos corais": 50,
-            "Gaibu": 50,
-            "Garapu após 2° Modelo": 28,
-            "Garapú até 2º Modelo": 25,
-            "Garapu Campo de aranha": 28,
-            "Garapu Flamenguinho": 33,
-            "Garapú Rosário": 35,
-            "Infantil": 20,
-            "Itapuama": 55,
-            "Jaqueira": 60,
-            "L. Garapu 2": 30,
-            "Malaquias Alto": 25,
-            "Malaquias Baixo": 25,
-            "Malaquias R.2;3 e Assembleia": 25,
-            "Massangana": 48,
-            "Mauriti": 25,
-            "Mista": 25,
-            "Muro alto": 90,
-            "Novo horiz.  dificil acesso": 38,
-            "Novo horiz. Principais": 35,
-            "P. de Galinhas": 90,
-            "P. de suape + pedágio Após posto": 55,
-            "P. de Suape + pedágio até o posto SHELL": 50,
-            "P. de suape 2ª + pedágio Portária": 60,
-            "Paiva": 60,
-            "Pirapama manguerinha": 40,
-            "Pista preta": 15,
-            "Ponte dos Carv.": 30,
-            "Pontezinha": 35,
-            "Praia de Suape": 60,
-            "Recanto do Paraíso": 48,
-            "Rosário": 32,
-            "Rua 52;28 Bairro": 30,
-            "Rua 53 Bairro": 28,
-            "Rua da aurora Bairro": 25,
-            "Rua do Açude": 28,
-            "Rua do bicudo": 30,
-            "Rua do dique": 23,
-            "SANTO iNÁCIO": 23,
-            "São Francisco": 28,
-            "Sapucaia": 23,
-            "serraria": 45,
-            "SETOR 4": 55,
-            "Torrinha": 23,
-            "Torrinha Alto": 25,
-            "Vila do SESI": 25,
-            "Vila social": 20,
-            "Xareu": 55
-          }
-        },
-        "CENTRO DO CABO": {
-          "destinos": {
-            "Águia American Club": 25,
-            "Algodoais Sentido ipojuca": 25,
-            "Algodoais Sentido praia": 20,
-            "alto cajueiro": 20,
-            "Alto S. Francisco": 15,
-            "Amor e Saúde": 10,
-            "Bar do doido": 60,
-            "Barbalho 1 e 2": 15,
-            "Bela vista": 13,
-            "Burrama": 22,
-            "Calhetas": 50,
-            "Casinhas Etapa 1": 13,
-            "Casinhas Etapa 2": 15,
-            "Centro do Cabo": 10,
-            "Charneca Corgo": 18,
-            "Charneca dificil Acesso": 18,
-            "Charneca Principal Baixo": 15,
-            "Charnequinha alta": 15,
-            "Charnequinha Baixa": 13,
-            "Cida park": 18,
-            "Cohab Antes da Passira": 10,
-            "Cohab Após a Passira": 10,
-            "Comun CONEST": 18,
-            "Comun Destilaria": 13,
-            "Cone antes do Don Helder": 15,
-            "Cruzeiro": 13,
-            "Destilaria": 10,
-            "Don Helder": 17,
-            "Eng. Novo Até a STATUS": 15,
-            "Eng. Novo Até o posto": 15,
-            "Ens. dos corais": 30,
-            "Gaibu": 30,
-            "Garapu após 2° Modelo": 15,
-            "Garapú até 2º Modelo": 13,
-            "Garapu Campo de aranha": 15,
-            "Garapu Flamenguinho": 20,
-            "Garapú Rosário": 20,
-            "Infantil": 10,
-            "Itapuama": 35,
-            "Jaqueira": 40,
-            "L. Garapu 2": 15,
-            "Malaquias Alto": 15,
-            "Malaquias Baixo": 13,
-            "Malaquias R.2;3 e Assembleia": 15,
-            "Massangana": 28,
-            "Mauriti": 10,
-            "Mista": 10,
-            "Muro alto": 70,
-            "Novo horiz. Difícil acesso": 18,
-            "Novo horiz. Principais": 15,
-            "P. de Galinhas": 70,
-            "P. de suape + pedágio Após posto": 40,
-            "P. de Suape + pedágio até o posto SHELL": 35,
-            "P. de suape 2ª + pedágio Portária": 45,
-            "Paiva": 40,
-            "Pirapama": 15,
-            "Pirapama manguerinha": 20,
-            "Pista preta": 17,
-            "Ponte dos Carv.": 25,
-            "Pontezinha": 30,
-            "Praia de Suape": 40,
-            "Recanto do Paraíso": 30,
-            "Rosário": 17,
-            "Rua 52;28 Bairro": 15,
-            "Rua 53 Bairro": 13,
-            "Rua da aurora Bairro": 13,
-            "Rua do Açude": 15,
-            "Rua do bicudo": 15,
-            "Rua do dique": 10,
-            "Santa Rosa Shekiná": 15,
-            "SANTO iNÁCIO": 10,
-            "São Francisco": 13,
-            "Sapucaia": 10,
-            "serraria": 25,
-            "SETOR 4": 35,
-            "Torrinha": 10,
-            "Torrinha Alto": 13,
-            "Vila Claudete": 13,
-            "Vila do SESI": 13,
-            "Vila social": 10,
-            "Xareu": 35
-          }
-        },
-        "CHARNECA (Pirapama centro, Barbalho 1 e 2)": {
-          "destinos": {
-            "Águia American Club": 20,
-            "Algodoais Sentido ipojuca": 40,
-            "Algodoais Sentido praia": 35,
-            "alto cajueiro": 20,
-            "Alto S. Francisco": 23,
-            "Amor e Saúde": 15,
-            "Bar do doido": 75,
-            "Barbalho 1 e 2": 15,
-            "Bela vista": 18,
-            "Burrama": 35,
-            "Calhetas": 65,
-            "Casinhas Etapa 1": 20,
-            "Casinhas Etapa 2": 23,
-            "Centro do Cabo": 15,
-            "Charneca Corgo": 18,
-            "Charneca dificil Acesso": 18,
-            "Charneca Principal Baixo": 15,
-            "Charnequinha alta": 23,
-            "Charnequinha Baixa": 18,
-            "Cida park": 15,
-            "Cohab Antes da Passira": 18,
-            "Cohab Após a Passira": 18,
-            "Comun CONEST": 25,
-            "Comun Destilaria": 18,
-            "Cone antes do Don Helder": 25,
-            "Cruzeiro": 18,
-            "Destilaria": 18,
-            "Don Helder": 25,
-            "Eng. Novo Até a STATUS": 15,
-            "Eng. Novo Até o posto": 15,
-            "Ens. dos corais": 45,
-            "Gaibu": 45,
-            "Garapu após 2° Modelo": 23,
-            "Garapú até 2º Modelo": 20,
-            "Garapu Campo de aranha": 23,
-            "Garapu Flamenguinho": 28,
-            "Garapú Rosário": 28,
-            "Infantil": 15,
-            "Itapuama": 50,
-            "Jaqueira": 55,
-            "L. Garapu 2": 23,
-            "Malaquias Alto": 23,
-            "Malaquias Baixo": 20,
-            "Malaquias R.2;3 e Assembleia": 18,
-            "Massangana": 43,
-            "Mauriti": 18,
-            "Mista": 15,
-            "Muro alto": 85,
-            "Novo horiz. Difícil acesso": 18,
-            "Novo horiz. Principais": 15,
-            "P. de Galinhas": 85,
-            "P. de suape + pedágio Após posto": 45,
-            "P. de Suape + pedágio até o posto SHELL": 40,
-            "P. de suape 2ª + pedágio Portária": 50,
-            "Paiva": 55,
-            "Pirapama": 15,
-            "Pirapama manguerinha": 20,
-            "Pista preta": 30,
-            "Ponte dos Carv.": 40,
-            "Pontezinha": 45,
-            "Praia de Suape": 55,
-            "Recanto do Paraíso": 25,
-            "Rosário": 25,
-            "Rua 52;28 Bairro": 23,
-            "Rua 53 Bairro": 18,
-            "Rua da aurora Bairro": 18,
-            "Rua do Açude": 21,
-            "Rua do bicudo": 23,
-            "Rua do dique": 18,
-            "Santa Rosa Shekiná": 15,
-            "SANTO iNÁCIO": 18,
-            "São Francisco": 18,
-            "Sapucaia": 15,
-            "serraria": 40,
-            "SETOR 4": 50,
-            "Torrinha": 15,
-            "Torrinha Alto": 18,
-            "Vila Claudete": 20,
-            "Vila do SESI": 15,
-            "Vila social": 18,
-            "Xareu": 50
-          }
-        },
-        "CHARNEQUINHA ALTA": {
-          "destinos": {
-            "Águia American Club": 25,
-            "Algodoais Sentido ipojuca": 30,
-            "Algodoais Sentido praia": 25,
-            "alto cajueiro": 28,
-            "Alto S. Francisco": 13,
-            "Amor e Saúde": 13,
-            "Bar do doido": 65,
-            "Barbalho 1 e 2": 20,
-            "Bela vista": 18,
-            "Burrama": 25,
-            "Calhetas": 55,
-            "Casinhas Etapa 1": 18,
-            "Casinhas Etapa 2": 21,
-            "Centro do Cabo": 13,
-            "Charneca Corgo": 23,
-            "Charneca dificil Acesso": 23,
-            "Charneca Principal Baixo": 20,
-            "Charnequinha alta": 10,
-            "Charnequinha Baixa": 10,
-            "Cida park": 24,
-            "Cohab Antes da Passira": 15,
-            "Cohab Após a Passira": 15,
-            "Comun CONEST": 25,
-            "Comun Destilaria": 21,
-            "Cone antes do Don Helder": 18,
-            "Cruzeiro": 18,
-            "Destilaria": 18,
-            "Don Helder": 21,
-            "Eng. Novo Até a STATUS": 20,
-            "Eng. Novo Até o posto": 20,
-            "Ens. dos corais": 35,
-            "Gaibu": 35,
-            "Garapu após 2° Modelo": 25,
-            "Garapú até 2º Modelo": 20,
-            "Garapu Campo de aranha": 25,
-            "Garapu Flamenguinho": 25,
-            "Garapú Rosário": 25,
-            "Infantil": 13,
-            "Itapuama": 40,
-            "Jaqueira": 45,
-            "L. Garapu 2": 15,
-            "Malaquias Alto": 15,
-            "Malaquias Baixo": 15,
-            "Malaquias R.2;3 e Assembleia": 15,
-            "Massangana": 35,
-            "Mauriti": 13,
-            "Mista": 15,
-            "Muro alto": 75,
-            "Novo horiz. Difícil acesso": 23,
-            "Novo horiz. Principais": 20,
-            "P. de Galinhas": 75,
-            "P. de suape + pedágio Após posto": 40,
-            "P. de Suape + pedágio até o posto SHELL": 35,
-            "P. de suape 2ª + pedágio Portária": 45,
-            "Paiva": 45,
-            "Pirapama": 20,
-            "Pirapama manguerinha": 28,
-            "Pista preta": 20,
-            "Ponte dos Carv.": 28,
-            "Pontezinha": 33,
-            "Praia de Suape": 45,
-            "Recanto do Paraíso": 38,
-            "Rosário": 23,
-            "Rua 52;28 Bairro": 13,
-            "Rua 53 Bairro": 13,
-            "Rua da aurora Bairro": 13,
-            "Rua do Açude": 15,
-            "Rua do bicudo": 13,
-            "Rua do dique": 21,
-            "Santa Rosa Shekiná": 20,
-            "SANTO iNÁCIO": 18,
-            "São Francisco": 13,
-            "Sapucaia": 10,
-            "serraria": 30,
-            "SETOR 4": 40,
-            "Torrinha": 15,
-            "Torrinha Alto": 18,
-            "Vila Claudete": 18,
-            "Vila do SESI": 15,
-            "Vila social": 18,
-            "Xareu": 40
-          }
-        },
-        "CHARNEQUINHA BAIXA": {
-          "destinos": {
-            "Águia American Club": 25,
-            "Algodoais Sentido ipojuca": 30,
-            "Algodoais Sentido praia": 25,
-            "alto cajueiro": 25,
-            "Alto S. Francisco": 13,
-            "Amor e Saúde": 13,
-            "Bar do doido": 65,
-            "Barbalho 1 e 2": 18,
-            "Bela vista": 18,
-            "Burrama": 25,
-            "Calhetas": 55,
-            "Casinhas Etapa 1": 15,
-            "Casinhas Etapa 2": 18,
-            "Centro do Cabo": 13,
-            "Charneca Corgo": 20,
-            "Charneca dificil Acesso": 20,
-            "Charneca Principal Baixo": 18,
-            "Charnequinha alta": 10,
-            "Charnequinha Baixa": 10,
-            "Cida park": 21,
-            "Cohab Antes da Passira": 15,
-            "Cohab Após a Passira": 15,
-            "Comun CONEST": 25,
-            "Comun Destilaria": 18,
-            "Cone antes do Don Helder": 18,
-            "Cruzeiro": 18,
-            "Destilaria": 15,
-            "Don Helder": 21,
-            "Eng. Novo Até a STATUS": 18,
-            "Eng. Novo Até o posto": 18,
-            "Ens. dos corais": 35,
-            "Gaibu": 35,
-            "Garapu após 2° Modelo": 23,
-            "Garapú até 2º Modelo": 18,
-            "Garapu Campo de aranha": 23,
-            "Garapu Flamenguinho": 28,
-            "Garapú Rosário": 25,
-            "Infantil": 13,
-            "Itapuama": 40,
-            "Jaqueira": 45,
-            "L. Garapu 2": 15,
-            "Malaquias Alto": 15,
-            "Malaquias Baixo": 15,
-            "Malaquias R.2;3 e Assembleia": 15,
-            "Massangana": 35,
-            "Mauriti": 13,
-            "Mista": 13,
-            "Muro alto": 75,
-            "Novo horiz. Difícil acesso": 21,
-            "Novo horiz. Principais": 18,
-            "P. de Galinhas": 75,
-            "P. de suape + pedágio Após posto": 40,
-            "P. de Suape + pedágio até o posto SHELL": 35,
-            "P. de suape 2ª + pedágio Portária": 45,
-            "Paiva": 45,
-            "Pirapama": 18,
-            "Pirapama manguerinha": 25,
-            "Pista preta": 20,
-            "Ponte dos Carv.": 25,
-            "Pontezinha": 30,
-            "Praia de Suape": 45,
-            "Recanto do Paraíso": 35,
-            "Rosário": 20,
-            "Rua 52;28 Bairro": 13,
-            "Rua 53 Bairro": 10,
-            "Rua da aurora Bairro": 10,
-            "Rua do Açude": 15,
-            "Rua do bicudo": 13,
-            "Rua do dique": 18,
-            "Santa Rosa Shekiná": 18,
-            "SANTO iNÁCIO": 15,
-            "São Francisco": 10,
-            "Sapucaia": 10,
-            "serraria": 30,
-            "SETOR 4": 40,
-            "Torrinha": 13,
-            "Torrinha Alto": 15,
-            "Vila Claudete": 15,
-            "Vila do SESI": 13,
-            "Vila social": 15,
-            "Xareu": 40
-          }
-        },
-        "COHAB": {
-          "destinos": {
-            "Águia American Club": 25,
-            "Algodoais Sentido ipojuca": 25,
-            "Algodoais Sentido praia": 20,
-            "alto cajueiro": 25,
-            "Alto S. Francisco": 13,
-            "Amor e Saúde": 13,
-            "Bar do doido": 60,
-            "Barbalho 1 e 2": 18,
-            "Bela vista": 13,
-            "Burrama": 25,
-            "Calhetas": 50,
-            "Casinhas Etapa 1": 13,
-            "Casinhas Etapa 2": 15,
-            "Centro do Cabo": 10,
-            "Charneca Corgo": 20,
-            "Charneca dificil Acesso": 20,
-            "Charneca Principal Baixo": 18,
-            "Charnequinha alta": 15,
-            "Charnequinha Baixa": 13,
-            "Cida park": 21,
-            "Cohab Antes da Passira": 10,
-            "Cohab Após a Passira": 10,
-            "Comun CONEST": 17,
-            "Comun Destilaria": 13,
-            "Cone antes do Don Helder": 17,
-            "Cruzeiro": 13,
-            "Destilaria": 13,
-            "Don Helder": 20,
-            "Eng. Novo Até a STATUS": 18,
-            "Eng. Novo Até o posto": 18,
-            "Ens. dos corais": 30,
-            "Gaibu": 30,
-            "Garapu após 2° Modelo": 15,
-            "Garapú até 2º Modelo": 13,
-            "Garapu Campo de aranha": 15,
-            "Garapu Flamenguinho": 20,
-            "Garapú Rosário": 17,
-            "Infantil": 13,
-            "Itapuama": 35,
-            "Jaqueira": 40,
-            "L. Garapu 2": 13,
-            "Malaquias Alto": 13,
-            "Malaquias Baixo": 10,
-            "Malaquias R.2;3 e Assembleia": 13,
-            "Massangana": 28,
-            "Mauriti": 10,
-            "Mista": 15,
-            "Muro alto": 70,
-            "Novo horiz. Difícil acesso": 21,
-            "Novo horiz. Principais": 18,
-            "P. de Galinhas": 70,
-            "P. de suape + pedágio  Após posto": 35,
-            "P. de Suape + pedágio até o posto SHELL": 30,
-            "P. de suape 2ª + pedágio Portária": 40,
-            "Paiva": 40,
-            "Pirapama": 18,
-            "Pirapama manguerinha": 25,
-            "Pista preta": 20,
-            "Ponte dos Carv.": 25,
-            "Pontezinha": 30,
-            "Praia de Suape": 40,
-            "Recanto do Paraíso": 35,
-            "Rosário": 15,
-            "Rua 52;28 Bairro": 13,
-            "Rua 53 Bairro": 10,
-            "Rua da aurora Bairro": 13,
-            "Rua do Açude": 10,
-            "Rua do bicudo": 13,
-            "Rua do dique": 13,
-            "Santa Rosa Shekiná": 20,
-            "SANTO iNÁCIO": 10,
-            "São Francisco": 10,
-            "Sapucaia": 13,
-            "serraria": 25,
-            "SETOR 4": 35,
-            "Torrinha": 10,
-            "Torrinha Alto": 13,
-            "Vila Claudete": 13,
-            "Vila do SESI": 15,
-            "Vila social": 13,
-            "Xareu": 35
-          }
-        },
-        "GARAPÚ 1( Até o 2º Colégio Modelo)": {
-          "destinos": {
-            "Águia American Club": 25,
-            "Algodoais Sentido ipojuca": 25,
-            "Algodoais Sentido praia": 25,
-            "alto cajueiro": 25,
-            "Alto S. Francisco": 18,
-            "Amor e Saúde": 15,
-            "Bar do doido": 63,
-            "Barbalho 1 e 2": 20,
-            "Bela vista": 15,
-            "Burrama": 25,
-            "Calhetas": 53,
-            "Casinhas Etapa 1": 10,
-            "Casinhas Etapa 2": 13,
-            "Centro do Cabo": 13,
-            "Charneca Corgo": 23,
-            "Charneca dificil Acesso": 23,
-            "Charneca Principal Baixo": 20,
-            "Charnequinha alta": 20,
-            "Charnequinha Baixa": 18,
-            "Cida park": 23,
-            "Cohab Antes da Passira": 13,
-            "Cohab Após a Passira": 13,
-            "Comun CONEST": 13,
-            "Comun Destilaria": 13,
-            "Cone antes do Don Helder": 18,
-            "Cruzeiro": 15,
-            "Destilaria": 13,
-            "Don Helder": 20,
-            "Eng. Novo Até a STATUS": 20,
-            "Eng. Novo Até o posto": 20,
-            "Ens. dos corais": 33,
-            "Gaibu": 33,
-            "Garapu após 2° Modelo": 10,
-            "Garapú até 2º Modelo": 10,
-            "Garapu Campo de aranha": 10,
-            "Garapu Flamenguinho": 10,
-            "Garapú Rosário": 18,
-            "Infantil": 15,
-            "Itapuama": 38,
-            "Jaqueira": 43,
-            "L. Garapu 2": 15,
-            "Malaquias Alto": 15,
-            "Malaquias Baixo": 15,
-            "Malaquias R.2;3 e Assembleia": 15,
-            "Massangana": 30,
-            "Mauriti": 13,
-            "Mista": 17,
-            "Muro alto": 73,
-            "Novo horiz. Difícil acesso": 23,
-            "Novo horiz. Principais": 20,
-            "P. de Galinhas": 73,
-            "P. de suape + pedágio Após posto": 38,
-            "P. de Suape + pedágio até o posto SHELL": 33,
-            "P. de suape 2ª + pedágio Portária": 43,
-            "Paiva": 43,
-            "Pirapama": 20,
-            "Pirapama manguerinha": 25,
-            "Pista preta": 20,
-            "Ponte dos Carv.": 25,
-            "Pontezinha": 30,
-            "Praia de Suape": 43,
-            "Recanto do Paraíso": 35,
-            "Rosário": 17,
-            "Rua 52;28 Bairro": 18,
-            "Rua 53 Bairro": 15,
-            "Rua da aurora Bairro": 18,
-            "Rua do Açude": 15,
-            "Rua do bicudo": 18,
-            "Rua do dique": 13,
-            "Santa Rosa Shekiná": 20,
-            "SANTO iNÁCIO": 10,
-            "São Francisco": 15,
-            "Sapucaia": 15,
-            "serraria": 25,
-            "SETOR 4": 38,
-            "Torrinha": 13,
-            "Torrinha Alto": 16,
-            "Vila Claudete": 10,
-            "Vila do SESI": 17,
-            "Vila social": 13,
-            "Xareu": 38
-          }
-        },
-        "GARAPÚ 2 ( Após o 2º Colégio Modelo ) ( Campo de Aranha )": {
-          "destinos": {
-            "Águia American Club": 28,
-            "Algodoais Sentido ipojuca": 28,
-            "Algodoais Sentido praia": 28,
-            "alto cajueiro": 28,
-            "Alto S. Francisco": 21,
-            "Amor e Saúde": 17,
-            "Bar do doido": 65,
-            "Barbalho 1 e 2": 23,
-            "Bela vista": 18,
-            "Burrama": 28,
-            "Calhetas": 55,
-            "Casinhas Etapa 1": 13,
-            "Casinhas Etapa 2": 13,
-            "Centro do Cabo": 15,
-            "Charneca Corgo": 25,
-            "Charneca dificil Acesso": 25,
-            "Charneca Principal Baixo": 23,
-            "Charnequinha alta": 25,
-            "Charnequinha Baixa": 23,
-            "Cida park": 26,
-            "Cohab Antes da Passira": 15,
-            "Cohab Após a Passira": 15,
-            "Comun CONEST": 13,
-            "Comun Destilaria": 13,
-            "Cone antes do Don Helder": 21,
-            "Cruzeiro": 18,
-            "Destilaria": 13,
-            "Don Helder": 23,
-            "Eng. Novo Até a STATUS": 23,
-            "Eng. Novo Até o posto": 23,
-            "Ens. dos corais": 35,
-            "Gaibu": 35,
-            "Garapu após 2° Modelo": 10,
-            "Garapú até 2º Modelo": 10,
-            "Garapu Campo de aranha": 10,
-            "Garapu Flamenguinho": 10,
-            "Garapú Rosário": 21,
-            "Infantil": 15,
-            "Itapuama": 40,
-            "Jaqueira": 45,
-            "L. Garapu 2": 18,
-            "Malaquias Alto": 18,
-            "Malaquias Baixo": 18,
-            "Malaquias R.2;3 e Assembleia": 18,
-            "Massangana": 33,
-            "Mauriti": 15,
-            "Mista": 20,
-            "Muro alto": 75,
-            "Novo horiz. Difícil acesso": 26,
-            "Novo horiz. Principais": 23,
-            "P. de Galinhas": 75,
-            "P. de suape + pedágio Após posto": 41,
-            "P. de Suape + pedágio até o posto SHELL": 36,
-            "P. de suape 2ª + pedágio Portária": 46,
-            "Paiva": 45,
-            "Pirapama": 23,
-            "Pirapama manguerinha": 28,
-            "Pista preta": 23,
-            "Ponte dos Carv.": 28,
-            "Pontezinha": 33,
-            "Praia de Suape": 45,
-            "Recanto do Paraíso": 38,
-            "Rosário": 20,
-            "Rua 52;28 Bairro": 21,
-            "Rua 53 Bairro": 18,
-            "Rua da aurora Bairro": 23,
-            "Rua do Açude": 18,
-            "Rua do bicudo": 21,
-            "Rua do dique": 13,
-            "Santa Rosa Shekiná": 23,
-            "SANTO iNÁCIO": 10,
-            "São Francisco": 18,
-            "Sapucaia": 18,
-            "serraria": 28,
-            "SETOR 4": 40,
-            "Torrinha": 15,
-            "Torrinha Alto": 18,
-            "Vila Claudete": 10,
-            "Vila do SESI": 20,
-            "Vila social": 13,
-            "Xareu": 40
-          }
-        },
-        "PISTA PRETA": {
-          "destinos": {
-            "Águia American Club": 35,
-            "Algodoais Sentido ipojuca": 40,
-            "Algodoais Sentido praia": 35,
-            "alto cajueiro": 35,
-            "Alto S. Francisco": 25,
-            "Amor e Saúde": 15,
-            "Bar do doido": 75,
-            "Barbalho 1 e 2": 30,
-            "Bela vista": 20,
-            "Burrama": 15,
-            "Calhetas": 65,
-            "Casinhas Etapa 1": 20,
-            "Casinhas Etapa 2": 23,
-            "Centro do Cabo": 15,
-            "Charneca Corgo": 33,
-            "Charneca dificil Acesso": 33,
-            "Charneca Principal Baixo": 30,
-            "Charnequinha alta": 23,
-            "Charnequinha Baixa": 20,
-            "Cida park": 33,
-            "Cohab Antes da Passira": 20,
-            "Cohab Após a Passira": 20,
-            "Comun CONEST": 20,
-            "Comun Destilaria": 18,
-            "Cone antes do Don Helder": 15,
-            "Cruzeiro": 20,
-            "Destilaria": 15,
-            "Don Helder": 17,
-            "Eng. Novo Até a STATUS": 23,
-            "Eng. Novo Até o posto": 23,
-            "Ens. dos corais": 45,
-            "Gaibu": 45,
-            "Garapu após 2° Modelo": 23,
-            "Garapú até 2º Modelo": 20,
-            "Garapu Campo de aranha": 23,
-            "Garapu Flamenguinho": 28,
-            "Garapú Rosário": 30,
-            "Infantil": 15,
-            "Itapuama": 50,
-            "Jaqueira": 55,
-            "L. Garapu 2": 25,
-            "Malaquias Alto": 20,
-            "Malaquias Baixo": 20,
-            "Malaquias R.2;3 e Assembleia": 20,
-            "Massangana": 43,
-            "Mauriti": 20,
-            "Mista": 20,
-            "Muro alto": 85,
-            "Novo horiz. Difícil acesso": 33,
-            "Novo horiz. Principais": 30,
-            "P. de Galinhas": 85,
-            "P. de suape + pedágio Após posto": 50,
-            "P. de Suape + pedágio até o posto SHELL": 45,
-            "P. de suape 2ª + pedágio Portária": 55,
-            "Paiva": 55,
-            "Pirapama": 30,
-            "Pirapama manguerinha": 35,
-            "Pista preta": 15,
-            "Ponte dos Carv.": 25,
-            "Pontezinha": 30,
-            "Praia de Suape": 55,
-            "Recanto do Paraíso": 43,
-            "Rosário": 27,
-            "Rua 52;28 Bairro": 25,
-            "Rua 53 Bairro": 23,
-            "Rua da aurora Bairro": 20,
-            "Rua do Açude": 23,
-            "Rua do bicudo": 25,
-            "Rua do dique": 18,
-            "Santa Rosa Shekiná": 28,
-            "SANTO iNÁCIO": 18,
-            "São Francisco": 23,
-            "Sapucaia": 18,
-            "serraria": 40,
-            "SETOR 4": 50,
-            "Torrinha": 18,
-            "Torrinha Alto": 20,
-            "Vila Claudete": 18,
-            "Vila do SESI": 20,
-            "Vila social": 15,
-            "Xareu": 50
-          }
-        },
-        "ROSÁRIO": {
-          "destinos": {
-            "Águia American Club": 35,
-            "Algodoais Sentido ipojuca": 25,
-            "Algodoais Sentido praia": 20,
-            "alto cajueiro": 30,
-            "Alto S. Francisco": 20,
-            "Amor e Saúde": 17,
-            "Bar do doido": 60,
-            "Barbalho 1 e 2": 25,
-            "Bela vista": 18,
-            "Burrama": 32,
-            "Calhetas": 50,
-            "Casinhas Etapa 1": 17,
-            "Casinhas Etapa 2": 20,
-            "Centro do Cabo": 17,
-            "Charneca Corgo": 28,
-            "Charneca dificil Acesso": 28,
-            "Charneca Principal Baixo": 25,
-            "Charnequinha alta": 23,
-            "Charnequinha Baixa": 20,
-            "Cida park": 28,
-            "Cohab Antes da Passira": 15,
-            "Cohab Após a Passira": 17,
-            "Comun CONEST": 25,
-            "Comun Destilaria": 20,
-            "Cone antes do Don Helder": 25,
-            "Cruzeiro": 18,
-            "Destilaria": 17,
-            "Don Helder": 28,
-            "Eng. Novo Até a STATUS": 25,
-            "Eng. Novo Até o posto": 25,
-            "Ens. dos corais": 30,
-            "Gaibu": 30,
-            "Garapu após 2° Modelo": 20,
-            "Garapú até 2º Modelo": 17,
-            "Garapu Campo de aranha": 20,
-            "Garapu Flamenguinho": 25,
-            "Garapú Rosário": 15,
-            "Infantil": 17,
-            "Itapuama": 35,
-            "Jaqueira": 40,
-            "L. Garapu 2": 15,
-            "Malaquias Alto": 18,
-            "Malaquias Baixo": 15,
-            "Malaquias R.2;3 e Assembleia": 18,
-            "Massangana": 28,
-            "Mauriti": 15,
-            "Mista": 20,
-            "Muro alto": 70,
-            "Novo horiz. Difícil acesso": 28,
-            "Novo horiz. Principais": 25,
-            "P. de Galinhas": 70,
-            "P. de suape + pedágio Após posto": 35,
-            "P. de Suape + pedágio até o posto SHELL": 30,
-            "P. de suape 2ª + pedágio Portária": 40,
-            "Paiva": 40,
-            "Pirapama": 25,
-            "Pirapama manguerinha": 30,
-            "Pista preta": 27,
-            "Ponte dos Carv.": 35,
-            "Pontezinha": 40,
-            "Praia de Suape": 40,
-            "Recanto do Paraíso": 40,
-            "Rosário": 15,
-            "Rua 52;28 Bairro": 20,
-            "Rua 53 Bairro": 20,
-            "Rua da aurora Bairro": 20,
-            "Rua do Açude": 15,
-            "Rua do bicudo": 20,
-            "Rua do dique": 20,
-            "Santa Rosa Shekiná": 23,
-            "SANTO iNÁCIO": 17,
-            "São Francisco": 17,
-            "Sapucaia": 20,
-            "serraria": 25,
-            "SETOR 4": 35,
-            "Torrinha": 17,
-            "Torrinha Alto": 20,
-            "Vila Claudete": 15,
-            "Vila do SESI": 20,
-            "Vila social": 17,
-            "Xareu": 35
-          }
-        },
-        "Shopping COSTA DOURADA": {
-          "destinos": {
-            "Águia American Club": 30,
-            "Algodoais Sentido ipojuca": 25,
-            "Algodoais Sentido praia": 20,
-            "alto cajueiro": 28,
-            "Alto S. Francisco": 15,
-            "Amor e Saúde": 15,
-            "Bar do doido": 60,
-            "Barbalho 1 e 2": 23,
-            "Bela vista": 15,
-            "Burrama": 28,
-            "Calhetas": 50,
-            "Casinhas Etapa 1": 13,
-            "Casinhas Etapa 2": 15,
-            "Centro do Cabo": 15,
-            "Charneca Corgo": 25,
-            "Charneca dificil Acesso": 25,
-            "Charneca Principal Baixo": 23,
-            "Charnequinha alta": 18,
-            "Charnequinha Baixa": 15,
-            "Cida park": 26,
-            "Cohab Antes da Passira": 10,
-            "Cohab Após a Passira": 13,
-            "Comun CONEST": 20,
-            "Comun Destilaria": 15,
-            "Cone antes do Don Helder": 20,
-            "Cruzeiro": 15,
-            "Destilaria": 13,
-            "Don Helder": 23,
-            "Eng. Novo Até a STATUS": 23,
-            "Eng. Novo Até o posto": 23,
-            "Ens. dos corais": 30,
-            "Gaibu": 30,
-            "Garapu após 2° Modelo": 18,
-            "Garapú até 2º Modelo": 15,
-            "Garapu Campo de aranha": 18,
-            "Garapu Flamenguinho": 23,
-            "Garapú Rosário": 15,
-            "Infantil": 15,
-            "Itapuama": 35,
-            "Jaqueira": 40,
-            "L. Garapu 2": 10,
-            "Malaquias Alto": 15,
-            "Malaquias Baixo": 13,
-            "Malaquias R.2;3 e Assembleia": 15,
-            "Massangana": 28,
-            "Mauriti": 13,
-            "Mista": 18,
-            "Muro alto": 70,
-            "Novo horiz. Difícil acesso": 26,
-            "Novo horiz. Principais": 23,
-            "P. de Galinhas": 70,
-            "P. de suape + pedágio Após posto": 35,
-            "P. de Suape + pedágio até o posto SHELL": 30,
-            "P. de suape 2ª + pedágio Portária": 40,
-            "Paiva": 40,
-            "Pirapama": 23,
-            "Pirapama manguerinha": 28,
-            "Pista preta": 23,
-            "Ponte dos Carv.": 30,
-            "Pontezinha": 35,
-            "Praia de Suape": 40,
-            "Recanto do Paraíso": 38,
-            "Rosário": 15,
-            "Rua 52;28 Bairro": 13,
-            "Rua 53 Bairro": 15,
-            "Rua da aurora Bairro": 15,
-            "Rua do Açude": 10,
-            "Rua do bicudo": 15,
-            "Rua do dique": 15,
-            "Santa Rosa Shekiná": 23,
-            "SANTO iNÁCIO": 13,
-            "São Francisco": 13,
-            "Sapucaia": 15,
-            "serraria": 25,
-            "SETOR 4": 35,
-            "Torrinha": 15,
-            "Torrinha Alto": 18,
-            "Vila Claudete": 13,
-            "Vila do SESI": 20,
-            "Vila social": 13,
-            "Xareu": 35
-          }
-        }
-      }
-    };
-  </script>
-  <script>
+    $(document).ready(function () {
+      $('#origem').select2({
+        theme: 'custom'
+      });
+      $('#destino').select2({
+        theme: 'custom'
+      });
+    });
 
 
     const origemSelect = document.getElementById('origem');
@@ -1229,12 +213,23 @@
     const observacao = document.getElementById('observacao');
 
     function carregarOrigens() {
-      for (const origem in dados.origens) {
-        const option = document.createElement('option');
-        option.value = origem;
-        option.textContent = origem;
-        origemSelect.appendChild(option);
-      }
+      fetch('viagens_reorganizado_ordenado3.json')
+        .then(response => response.json())
+        .then(data => {
+          dados = data;
+          for (const origem in dados.origens) {
+            const option = document.createElement('option');
+            option.value = origem;
+            option.textContent = origem;
+            origemSelect.appendChild(option);
+          }
+          // Aplicar Select2 após preencher
+          $('#origem').select2({
+            theme: "custom",
+          });
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+
     }
 
     function atualizarDestinos() {
@@ -1251,6 +246,10 @@
         option.textContent = destino;
         destinoSelect.appendChild(option);
       }
+      // Reaplica o Select2 com o tema personalizado
+      $('#destino').select2({
+        theme: "custom",
+      });
     }
 
     function calcularValor() {
@@ -1349,305 +348,76 @@
  * @param {Object} mapsData - Dados da resposta da API do Google Maps
  * @returns {Object} - O resultado (endereço) mais próximo da coordenada de referência
  */
-function findNearestAddress(mapsData) {
-  // Verificação de dados de entrada
-  if (!mapsData || !mapsData.results || mapsData.results.length === 0) {
-    return { error: "Dados inválidos ou vazios" };
-  }
+    function findNearestAddress(mapsData) {
+      // Verificação de dados de entrada
+      if (!mapsData || !mapsData.results || mapsData.results.length === 0) {
+        return { error: "Dados inválidos ou vazios" };
+      }
 
-  // Obtém a coordenada de referência do primeiro resultado
-  const referenceCoord = mapsData.results[0].geometry.location;
-  
-  // Cria um array para armazenar os resultados com suas distâncias calculadas
-  const resultsWithDistance = mapsData.results.map(result => {
-    // Verifica se o resultado possui coordenadas válidas
-    if (!result.geometry || !result.geometry.location) {
-      return { result, distance: Number.MAX_VALUE };
+      // Obtém a coordenada de referência do primeiro resultado
+      const referenceCoord = mapsData.results[0].geometry.location;
+
+      // Cria um array para armazenar os resultados com suas distâncias calculadas
+      const resultsWithDistance = mapsData.results.map(result => {
+        // Verifica se o resultado possui coordenadas válidas
+        if (!result.geometry || !result.geometry.location) {
+          return { result, distance: Number.MAX_VALUE };
+        }
+
+        // Calcula a distância entre a coordenada de referência e a coordenada do resultado atual
+        const distance = calculateHaversineDistance(
+          referenceCoord.lat,
+          referenceCoord.lng,
+          result.geometry.location.lat,
+          result.geometry.location.lng
+        );
+
+        return { result, distance };
+      });
+
+      // Ordena os resultados por distância (do mais próximo ao mais distante)
+      resultsWithDistance.sort((a, b) => a.distance - b.distance);
+
+      // O primeiro resultado após a ordenação será o mais próximo (ignorando o próprio referencial)
+      // Começamos do índice 1 para pular o próprio ponto de referência
+      const nearest = resultsWithDistance.length > 1 ? resultsWithDistance[1] : resultsWithDistance[0];
+
+      // Exibe informações sobre o endereço mais próximo
+      console.log("Coordenada de referência:", referenceCoord);
+      console.log("Endereço mais próximo:", nearest.result.formatted_address);
+      console.log("Distância calculada:", nearest.distance.toFixed(2), "metros");
+
+      return nearest.result;
     }
-    
-    // Calcula a distância entre a coordenada de referência e a coordenada do resultado atual
-    const distance = calculateHaversineDistance(
-      referenceCoord.lat, 
-      referenceCoord.lng,
-      result.geometry.location.lat, 
-      result.geometry.location.lng
-    );
-    
-    return { result, distance };
-  });
-  
-  // Ordena os resultados por distância (do mais próximo ao mais distante)
-  resultsWithDistance.sort((a, b) => a.distance - b.distance);
-  
-  // O primeiro resultado após a ordenação será o mais próximo (ignorando o próprio referencial)
-  // Começamos do índice 1 para pular o próprio ponto de referência
-  const nearest = resultsWithDistance.length > 1 ? resultsWithDistance[1] : resultsWithDistance[0];
-  
-  // Exibe informações sobre o endereço mais próximo
-  console.log("Coordenada de referência:", referenceCoord);
-  console.log("Endereço mais próximo:", nearest.result.formatted_address);
-  console.log("Distância calculada:", nearest.distance.toFixed(2), "metros");
-  
-  return nearest.result;
-}
 
-/**
- * Calcula a distância entre dois pontos de coordenadas usando a fórmula de Haversine
- * @param {number} lat1 - Latitude do primeiro ponto
- * @param {number} lon1 - Longitude do primeiro ponto
- * @param {number} lat2 - Latitude do segundo ponto
- * @param {number} lon2 - Longitude do segundo ponto
- * @returns {number} - Distância em metros
- */
-function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-  // Raio da Terra em metros
-  const R = 6371000;
-  
-  // Converte graus para radianos
-  const φ1 = lat1 * Math.PI / 180;
-  const φ2 = lat2 * Math.PI / 180;
-  const Δφ = (lat2 - lat1) * Math.PI / 180;
-  const Δλ = (lon2 - lon1) * Math.PI / 180;
-  
-  // Fórmula de Haversine
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ/2) * Math.sin(Δλ/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  
-  // Distância em metros
-  return R * c;
-}
+    /**
+     * Calcula a distância entre dois pontos de coordenadas usando a fórmula de Haversine
+     * @param {number} lat1 - Latitude do primeiro ponto
+     * @param {number} lon1 - Longitude do primeiro ponto
+     * @param {number} lat2 - Latitude do segundo ponto
+     * @param {number} lon2 - Longitude do segundo ponto
+     * @returns {number} - Distância em metros
+     */
+    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+      // Raio da Terra em metros
+      const R = 6371000;
 
-/* Exemplo de uso:
-// Considere que 'mapsData' é o objeto JSON recebido da API do Google Maps
+      // Converte graus para radianos
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δφ = (lat2 - lat1) * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
 
-// Teste com os dados da API (removidos caracteres de escape)
-const mapsData = {
-  "plus_code": {
-    "compound_code": "MWWJ+JMM Cabo de Santo Agostinho, PE, Brasil",
-    "global_code": "6936MWWJ+JMM"
-  },
-  "results": [
-    {
-      "address_components": [
-        {
-          "long_name": "MWWJ+JM",
-          "short_name": "MWWJ+JM",
-          "types": ["plus_code"]
-        },
-        {
-          "long_name": "Cabo de Santo Agostinho",
-          "short_name": "Cabo de Santo Agostinho",
-          "types": ["administrative_area_level_2", "political"]
-        },
-        {
-          "long_name": "Pernambuco",
-          "short_name": "PE",
-          "types": ["administrative_area_level_1", "political"]
-        },
-        {
-          "long_name": "Brasil",
-          "short_name": "BR",
-          "types": ["country", "political"]
-        }
-      ],
-      "formatted_address": "MWWJ+JM Cabo de Santo Agostinho, PE, Brasil",
-      "geometry": {
-        "bounds": {
-          "northeast": {
-            "lat": -8.303374999999999,
-            "lng": -35.06825
-          },
-          "southwest": {
-            "lat": -8.3035,
-            "lng": -35.068375
-          }
-        },
-        "location": {
-          "lat": -8.3034112,
-          "lng": -35.0683136
-        },
-        "location_type": "GEOMETRIC_CENTER",
-        "viewport": {
-          "northeast": {
-            "lat": -8.302088519708498,
-            "lng": -35.0669635197085
-          },
-          "southwest": {
-            "lat": -8.304786480291503,
-            "lng": -35.0696614802915
-          }
-        }
-      },
-      "place_id": "GhIJ8Hp6tlibIMARnu8CgL6IQcA",
-      "plus_code": {
-        "compound_code": "MWWJ+JM Cabo de Santo Agostinho, PE, Brasil",
-        "global_code": "6936MWWJ+JM"
-      },
-      "types": ["plus_code"]
-    },
-    {
-      "address_components": [
-        {
-          "long_name": "16",
-          "short_name": "16",
-          "types": ["street_number"]
-        },
-        {
-          "long_name": "BR-101",
-          "short_name": "BR-101",
-          "types": ["route"]
-        },
-        {
-          "long_name": "Vila Teatrologo Barreto Junior",
-          "short_name": "Vila Teatrologo Barreto Junior",
-          "types": ["political", "sublocality", "sublocality_level_1"]
-        },
-        {
-          "long_name": "Cabo de Santo Agostinho",
-          "short_name": "Cabo de Santo Agostinho",
-          "types": ["administrative_area_level_2", "political"]
-        },
-        {
-          "long_name": "Pernambuco",
-          "short_name": "PE",
-          "types": ["administrative_area_level_1", "political"]
-        },
-        {
-          "long_name": "Brasil",
-          "short_name": "BR",
-          "types": ["country", "political"]
-        },
-        {
-          "long_name": "54590-000",
-          "short_name": "54590-000",
-          "types": ["postal_code"]
-        }
-      ],
-      "formatted_address": "BR-101, 16 - Vila Teatrologo Barreto Junior, Cabo de Santo Agostinho - PE, 54590-000, Brasil",
-      "geometry": {
-        "location": {
-          "lat": -8.302287,
-          "lng": -35.069497
-        },
-        "location_type": "ROOFTOP",
-        "viewport": {
-          "northeast": {
-            "lat": -8.300938019708497,
-            "lng": -35.0681480197085
-          },
-          "southwest": {
-            "lat": -8.303635980291501,
-            "lng": -35.07084598029149
-          }
-        }
-      },
-      "navigation_points": [
-        {
-          "location": {
-            "latitude": -8.3022305,
-            "longitude": -35.069588
-          }
-        }
-      ],
-      "place_id": "ChIJkQsxhETwqgcRyg3LMtFWstA",
-      "plus_code": {
-        "compound_code": "MWXJ+36 Vila Teatrologo Barreto Junior, Cabo de Santo Agostinho - PE, Brasil",
-        "global_code": "6936MWXJ+36"
-      },
-      "types": ["street_address"]
-    },
-    {
-      "address_components": [
-        {
-          "long_name": "4",
-          "short_name": "4",
-          "types": ["street_number"]
-        },
-        {
-          "long_name": "BR-101",
-          "short_name": "BR-101",
-          "types": ["route"]
-        },
-        {
-          "long_name": "Pirapama",
-          "short_name": "Pirapama",
-          "types": ["political", "sublocality", "sublocality_level_1"]
-        },
-        {
-          "long_name": "Cabo de Santo Agostinho",
-          "short_name": "Cabo de Santo Agostinho",
-          "types": ["administrative_area_level_2", "political"]
-        },
-        {
-          "long_name": "Pernambuco",
-          "short_name": "PE",
-          "types": ["administrative_area_level_1", "political"]
-        },
-        {
-          "long_name": "Brasil",
-          "short_name": "BR",
-          "types": ["country", "political"]
-        },
-        {
-          "long_name": "54590-000",
-          "short_name": "54590-000",
-          "types": ["postal_code"]
-        }
-      ],
-      "formatted_address": "BR-101, 4 - Pirapama, Cabo de Santo Agostinho - PE, 54590-000, Brasil",
-      "geometry": {
-        "bounds": {
-          "northeast": {
-            "lat": -8.3014189,
-            "lng": -35.0697753
-          },
-          "southwest": {
-            "lat": -8.3017527,
-            "lng": -35.0700023
-          }
-        },
-        "location": {
-          "lat": -8.3015854,
-          "lng": -35.0698928
-        },
-        "location_type": "ROOFTOP",
-        "viewport": {
-          "northeast": {
-            "lat": -8.300236819708497,
-            "lng": -35.0685398197085
-          },
-          "southwest": {
-            "lat": -8.302934780291501,
-            "lng": -35.0712377802915
-          }
-        }
-      },
-      "navigation_points": [
-        {
-          "location": {
-            "latitude": -8.3017435,
-            "longitude": -35.0696269
-          }
-        }
-      ],
-      "place_id": "ChIJ5aJoY0PwqgcRB5H7tsKTp2c",
-      "types": ["premise", "street_address"]
-    },
-    // Outros resultados omitidos para brevidade
-  ],
-  "status": "OK"
-};
+      // Fórmula de Haversine
+      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-// Encontra o endereço mais próximo
-const nearestAddress = findNearestAddress(mapsData);
-
-// Exibe o resultado
-console.log("Endereço mais próximo encontrado:");
-console.log(JSON.stringify(nearestAddress, null, 2));
-*/ 
-</script>
+      // Distância em metros
+      return R * c;
+    }
+  </script>
 </body>
 
 </html>
