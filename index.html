@@ -310,7 +310,7 @@
         .then(reg => console.log('Service Worker registrado!', reg))
         .catch(err => console.error('Erro ao registrar o SW', err));
     }
-    if (navigator.geolocation) {
+/*    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude;
@@ -325,7 +325,7 @@
     } else {
       alert("Geolocalização não é suportada neste navegador.");
     }
-
+*/
     function getAddressFromCoords(lat, lon) {
       fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=`)
         .then(response => response.json())
