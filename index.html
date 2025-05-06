@@ -185,10 +185,10 @@
 
     <div class="result" id="valor"></div>
 
-    <div id="geoinfo">
+    <!-- <div id="geoinfo">
       <strong>📍 Localização Atual:</strong>
       <span id="geolocation">Buscando localização...</span>
-    </div>
+    </div> -->
 
     <button onclick="compartilharWhatsApp()">Compartilhar no WhatsApp</button>
   </div>
@@ -326,7 +326,7 @@
       alert("Geolocalização não é suportada neste navegador.");
     }
 */
-    function getAddressFromCoords(lat, lon) {
+   /* function getAddressFromCoords(lat, lon) {
       fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=`)
         .then(response => response.json())
         .then(data => {
@@ -339,7 +339,7 @@
           console.error("Erro ao buscar endereço:", error);
         });
     }
-
+*/
   </script>
   <script>
     /**
