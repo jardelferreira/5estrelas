@@ -327,7 +327,7 @@
     }
 
     function getAddressFromCoords(lat, lon) {
-      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=AIzaSyAqdoXdjUq5txykTMQsfwnkO1aTbx4kf-g`)
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=`)
         .then(response => response.json())
         .then(data => {
           const address = data.display_name;
